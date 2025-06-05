@@ -1,0 +1,44 @@
+<.header>
+  Listing Currency conversions
+  <:actions>
+    <.link patch={~p"/currency_conversions/new"}>
+      <.button>New Currency conversion</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="currency_conversions"
+  rows={@streams.currency_conversions}
+  row_click={fn {_id, currency_conversion} -> JS.navigate(~p"/currency_conversions/#{currency_conversion}") end}
+>
+  <:col :let={{_id, currency_conversion}} label="Source currency">{currency_conversion.source_currency}</:col>
+  <:col :let={{_id, currency_conversion}} label="Target currency">{currency_conversion.target_currency}</:col>
+  <:col :let={{_id, currency_conversion}} label="Source amount">{currency_conversion.source_amount}</:col>
+  <:col :let={{_id, currency_conversion}} label="Target amount">{currency_conversion.target_amount}</:col>
+  <:action :let={{_id, currency_conversion}}>
+    <div class="sr-only">
+      <.link navigate={~p"/currency_conversions/#{currency_conversion}"}>Show</.link>
+    </div>
+    <.link patch={~p"/currency_conversions/#{currency_conversion}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, currency_conversion}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: currency_conversion.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="currency_conversion-modal" show on_cancel={JS.patch(~p"/currency_conversions")}>
+  <.live_component
+    module={CodingChallengeWeb.CurrencyConversionLive.FormComponent}
+    id={@currency_conversion.id || :new}
+    title={@page_title}
+    action={@live_action}
+    currency_conversion={@currency_conversion}
+    patch={~p"/currency_conversions"}
+  />
+</.modal>
